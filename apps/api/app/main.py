@@ -1,67 +1,73 @@
-from datetime import datetime
-from typing import Literal
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
-from pydantic import BaseModel, Field
+from fastapi.middleware.cors import CORSMiddleware
 
+from .db import init_db
+from .schemas import IngestRequest, ReportRequest, ScanRequest, SlackTestRequest, WebhookEnvelope
+from .services import (
+    dashboard_snapshot,
+    generate_report,
+    ingest_github_webhook,
+    ingest_runtime_events,
+    ingest_stripe_webhook,
+    send_slack_test,
+    trigger_scan,
+)
 from .settings import settings
 
-app = FastAPI(title=settings.app_name)
+
+@asynccontextmanager
+async def lifespan(_app: FastAPI):
+    init_db()
+    yield
 
 
-class EventRecord(BaseModel):
-    method: str
-    path: str
-    status_code: int
-    latency_ms: int
-    ip: str | None = None
-    user_agent: str | None = None
-    environment: str = "prod"
-    occurred_at: datetime = Field(default_factory=datetime.utcnow)
+app = FastAPI(title=settings.app_name, lifespan=lifespan)
 
-
-class IngestRequest(BaseModel):
-    org_token: str
-    endpoint_name: str
-    events: list[EventRecord]
-
-
-class ReportRequest(BaseModel):
-    org_token: str
-    report_type: Literal["soc2", "gdpr", "iso27001"]
-    start_at: datetime
-    end_at: datetime
-
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.get("/health")
-async def health() -> dict[str, str]:
-    return {"status": "ok"}
+async def health() -> dict[str, str | bool]:
+    return {"status": "ok", "database_ready": True}
 
 
 @app.post("/v1/ingest/events")
-async def ingest_events(payload: IngestRequest) -> dict[str, int | str]:
-    return {
-        "status": "accepted",
-        "received": len(payload.events),
-    }
+async def ingest_events(payload: IngestRequest) -> dict[str, object]:
+    return ingest_runtime_events(payload)
 
 
 @app.get("/v1/alerts")
-async def list_alerts() -> dict[str, list[dict[str, str]]]:
-    return {
-        "alerts": [
-            {
-                "severity": "critical",
-                "title": "Placeholder alert",
-                "description": "Wire this endpoint to Supabase and the worker pipeline.",
-            }
-        ]
-    }
+async def list_alerts(org_token: str | None = None) -> dict[str, object]:
+    return dashboard_snapshot(org_token)
 
 
 @app.post("/v1/reports")
-async def request_report(payload: ReportRequest) -> dict[str, str]:
-    return {
-        "status": "queued",
-        "type": payload.report_type,
-    }
+async def request_report(payload: ReportRequest) -> dict[str, object]:
+    return generate_report(payload)
+
+
+@app.post("/v1/scans/trigger")
+async def scan_target(payload: ScanRequest) -> dict[str, object]:
+    return trigger_scan(payload)
+
+
+@app.post("/v1/webhooks/github")
+async def github_webhook(payload: WebhookEnvelope) -> dict[str, object]:
+    return ingest_github_webhook(payload)
+
+
+@app.post("/v1/webhooks/stripe")
+async def stripe_webhook(payload: WebhookEnvelope) -> dict[str, object]:
+    return ingest_stripe_webhook(payload)
+
+
+@app.post("/v1/integrations/slack/test")
+async def slack_test(payload: SlackTestRequest) -> dict[str, object]:
+    return await send_slack_test(payload)

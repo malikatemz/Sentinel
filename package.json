@@ -1,6 +1,6 @@
 {
   "name": "sentinelapi",
-  "private": 
+  "private": true,
   "workspaces": [
     "apps/*",
     "packages/*",
