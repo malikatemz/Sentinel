@@ -24,7 +24,7 @@ class Settings(BaseModel):
     )
     allowed_hosts: list[str] = _csv_env(
         "ALLOWED_HOSTS",
-        "127.0.0.1,localhost",
+        "127.0.0.1,localhost,testserver",
     )
     dev_org_tokens: list[str] = _csv_env(
         "SENTINEL_DEV_TOKENS",

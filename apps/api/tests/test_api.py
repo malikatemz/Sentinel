@@ -13,10 +13,14 @@ def make_client(tmp_path, monkeypatch):
   monkeypatch.setenv("SENTINEL_DATABASE_PATH", str(tmp_path / "sentinel.db"))
   import app.settings as settings_module
   import app.db as db_module
+  import app.security as security_module
+  import app.services as services_module
   import app.main as main_module
 
   reload(settings_module)
   reload(db_module)
+  reload(security_module)
+  reload(services_module)
   reload(main_module)
   db_module.init_db()
   return TestClient(main_module.app)
