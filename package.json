@@ -11,7 +11,11 @@
     "build:web": "npm run build --workspace @sentinel/web",
     "start:web": "npm run start --workspace @sentinel/web",
     "build:sdk-node": "npm run build --workspace @sentinel/sdk-node",
-    "dev:demo": "npm run dev --workspace @sentinel/express-demo"
+    "dev:demo": "npm run dev --workspace @sentinel/express-demo",
+    "supabase:start": "npx supabase start",
+    "supabase:stop": "npx supabase stop",
+    "supabase:status": "npx supabase status",
+    "supabase:reset": "npx supabase db reset"
   },
   "engines": {
     "node": ">=24"

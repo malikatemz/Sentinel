@@ -33,3 +33,21 @@ npm run dev:demo
 ```
 
 Copy `.env.example` to `.env.local` or your deployment environment before wiring waitlist persistence, auth, billing, or outbound integrations.
+
+## Backend quick start
+
+```bash
+C:\Users\MERAB\AppData\Local\Programs\Python\Python312\python.exe -m venv apps\api\.venv
+apps\api\.venv\Scripts\python.exe -m pip install -e apps\api
+apps\api\.venv\Scripts\python.exe -m uvicorn app.main:app --app-dir apps\api --reload
+```
+
+## Supabase local
+
+The repo is initialized for local Supabase development.
+
+```bash
+npm run supabase:start
+```
+
+If the command fails on this machine, install and start Docker Desktop first. The current Supabase CLI setup and SQL migrations are already in place under `supabase/`.
