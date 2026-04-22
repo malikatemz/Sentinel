@@ -1,0 +1,1347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SentinelAPI — Security Monitoring for Developer APIs</title>
+  <meta name="description" content="Monitor your APIs for security threats in real time. One-line SDK integration. Auto-generated compliance reports. $9/mo.">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { font-family: 'Inter', sans-serif; }
+    ::selection { background: #111827; color: #fff; }
+
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+    @keyframes slide-in {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes typing {
+      from { width: 0; }
+      to { width: 100%; }
+    }
+    @keyframes blink-caret {
+      from, to { border-color: transparent; }
+      50% { border-color: #10B981; }
+    }
+    @keyframes scan-line {
+      0% { transform: translateY(-100%); }
+      100% { transform: translateY(100vh); }
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-10px); }
+    }
+    @keyframes fade-in-up {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes count-up {
+      from { opacity: 0; transform: scale(0.5); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    @keyframes shimmer {
+      0% { background-position: -200% 0; }
+      100% { background-position: 200% 0; }
+    }
+
+    .animate-fade-in-up { animation: fade-in-up 0.6s ease-out forwards; }
+    .animate-float { animation: float 3s ease-in-out infinite; }
+    .animate-pulse-dot { animation: pulse-dot 2s ease-in-out infinite; }
+    .delay-100 { animation-delay: 100ms; }
+    .delay-200 { animation-delay: 200ms; }
+    .delay-300 { animation-delay: 300ms; }
+    .delay-400 { animation-delay: 400ms; }
+    .delay-500 { animation-delay: 500ms; }
+    .delay-600 { animation-delay: 600ms; }
+
+    .terminal-text {
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+      line-height: 1.7;
+    }
+
+    .scan-overlay {
+      background: linear-gradient(180deg, transparent 0%, rgba(16,185,129,0.05) 50%, transparent 100%);
+      animation: scan-line 4s linear infinite;
+      pointer-events: none;
+    }
+
+    .gradient-border {
+      background: linear-gradient(135deg, #10B981, #111827, #10B981);
+      background-size: 200% 200%;
+      animation: shimmer 3s ease-in-out infinite;
+    }
+
+    .pricing-popular {
+      background: linear-gradient(135deg, #111827 0%, #1F2937 100%);
+    }
+
+    .threat-pulse {
+      box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);
+      animation: threat-ring 1.5s ease-out infinite;
+    }
+    @keyframes threat-ring {
+      0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+      100% { box-shadow: 0 0 0 15px rgba(239, 68, 68, 0); }
+    }
+
+    .stat-card:hover .stat-number {
+      transform: scale(1.05);
+      transition: transform 0.3s ease;
+    }
+
+    .code-highlight {
+      background: linear-gradient(135deg, rgba(16,185,129,0.1), rgba(16,185,129,0.05));
+      border-left: 3px solid #10B981;
+    }
+
+    .feature-card {
+      transition: all 0.3s ease;
+    }
+    .feature-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 20px 40px -12px rgba(0,0,0,0.1);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    .toast {
+      transform: translateY(100px);
+      opacity: 0;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    .nav-blur {
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+    }
+  </style>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            cream: '#FDFBF7',
+            'cream-dark': '#F4F2EE',
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-cream text-gray-900 antialiased overflow-x-hidden">
+
+  <!-- Toast Notification -->
+  <div id="toast" class="toast fixed bottom-6 right-6 z-[100] bg-gray-900 text-white px-6 py-4 rounded-2xl shadow-xl flex items-center gap-3 max-w-sm">
+    <i data-lucide="check-circle" class="w-5 h-5 text-emerald-400 flex-shrink-0"></i>
+    <span id="toast-message" class="text-sm font-medium">Success!</span>
+  </div>
+
+  <!-- Navigation -->
+  <nav class="fixed top-0 left-0 right-0 z-50 nav-blur bg-cream/80 border-b border-gray-100/60">
+    <div class="max-w-[1440px] mx-auto px-6 md:px-12 py-4 flex items-center justify-between">
+      <a href="#" class="flex items-center gap-2.5">
+        <div class="w-8 h-8 bg-gray-900 rounded-br-lg rounded-tl-lg rounded-tr-sm rounded-bl-sm flex items-center justify-center">
+          <i data-lucide="shield-check" class="w-4 h-4 text-emerald-400"></i>
+        </div>
+        <span class="text-xl font-semibold tracking-tight">SentinelAPI</span>
+      </a>
+      <div class="hidden md:flex items-center gap-8">
+        <a href="#features" class="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors duration-150">Features</a>
+        <a href="#how-it-works" class="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors duration-150">How It Works</a>
+        <a href="#pricing" class="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors duration-150">Pricing</a>
+        <a href="#faq" class="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors duration-150">FAQ</a>
+      </div>
+      <div class="flex items-center gap-3">
+        <a href="#waitlist" class="hidden sm:inline-flex items-center gap-2 bg-gray-900 text-white text-sm font-medium px-5 py-2.5 rounded-full hover:bg-gray-800 hover:scale-105 transition-all duration-150">
+          Join Waitlist
+          <i data-lucide="arrow-right" class="w-4 h-4"></i>
+        </a>
+        <button id="mobile-menu-btn" class="md:hidden p-2 rounded-xl hover:bg-cream-dark transition-colors">
+          <i data-lucide="menu" class="w-5 h-5"></i>
+        </button>
+      </div>
+    </div>
+    <!-- Mobile Menu -->
+    <div id="mobile-menu" class="hidden md:hidden bg-cream border-t border-gray-100 px-6 py-4 space-y-3">
+      <a href="#features" class="block text-sm font-medium text-gray-600 py-2">Features</a>
+      <a href="#how-it-works" class="block text-sm font-medium text-gray-600 py-2">How It Works</a>
+      <a href="#pricing" class="block text-sm font-medium text-gray-600 py-2">Pricing</a>
+      <a href="#faq" class="block text-sm font-medium text-gray-600 py-2">FAQ</a>
+      <a href="#waitlist" class="block bg-gray-900 text-white text-sm font-medium px-5 py-3 rounded-full text-center mt-2">Join Waitlist</a>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="pt-28 pb-16 md:pt-36 md:pb-24 px-6 md:px-12">
+    <div class="max-w-[1440px] mx-auto flex flex-col lg:flex-row items-center gap-12 lg:gap-20">
+      <!-- Left Content -->
+      <div class="flex-1 max-w-2xl animate-fade-in-up">
+        <div class="inline-flex items-center gap-2 bg-cream-dark text-gray-600 text-xs font-medium px-4 py-2 rounded-full mb-6 border border-gray-200/60">
+          <span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse-dot"></span>
+          Launching in 30 days · Join the waitlist
+        </div>
+        <h1 class="text-5xl md:text-6xl lg:text-[80px] font-semibold leading-[1.08] tracking-tight mb-6">
+          Your APIs are<br>
+          <span class="text-gray-400">probably</span><br>
+          <span class="bg-gradient-to-r from-emerald-600 to-emerald-400 bg-clip-text text-transparent">exposed.</span>
+        </h1>
+        <p class="text-lg md:text-xl text-gray-600 leading-relaxed mb-8 max-w-lg">
+          SentinelAPI monitors your APIs for security threats in real time — exposed ports, credential leaks, anomalies — with a one-line SDK integration.
+        </p>
+        <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-8">
+          <a href="#waitlist" class="group inline-flex items-center gap-2.5 bg-gray-900 text-white text-sm font-medium px-7 py-3.5 rounded-full hover:bg-gray-800 hover:scale-105 transition-all duration-150 shadow-lg shadow-gray-900/20">
+            Get Early Access
+            <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform duration-150"></i>
+          </a>
+          <a href="#demo" class="inline-flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors duration-150 px-4 py-3.5">
+            <i data-lucide="play-circle" class="w-4 h-4"></i>
+            See it in action
+          </a>
+        </div>
+        <div class="flex items-center gap-6 text-sm text-gray-400">
+          <div class="flex items-center gap-1.5">
+            <i data-lucide="check" class="w-4 h-4 text-emerald-500"></i>
+            5 min setup
+          </div>
+          <div class="flex items-center gap-1.5">
+            <i data-lucide="check" class="w-4 h-4 text-emerald-500"></i>
+            From $9/mo
+          </div>
+          <div class="flex items-center gap-1.5">
+            <i data-lucide="check" class="w-4 h-4 text-emerald-500"></i>
+            SOC2 reports
+          </div>
+        </div>
+      </div>
+      <!-- Right - Terminal -->
+      <div class="flex-1 max-w-xl w-full animate-fade-in-up delay-300" style="opacity:0; animation-fill-mode:forwards;">
+        <div class="relative">
+          <div class="absolute -inset-4 bg-gradient-to-br from-emerald-100/40 to-gray-100/40 rounded-3xl blur-2xl"></div>
+          <div class="relative bg-gray-900 rounded-2xl overflow-hidden shadow-2xl">
+            <!-- Terminal Header -->
+            <div class="flex items-center gap-2 px-4 py-3 bg-gray-800/80 border-b border-gray-700/50">
+              <div class="w-3 h-3 rounded-full bg-red-400/80"></div>
+              <div class="w-3 h-3 rounded-full bg-yellow-400/80"></div>
+              <div class="w-3 h-3 rounded-full bg-green-400/80"></div>
+              <span class="ml-3 text-xs text-gray-500 font-mono">sentinel@api:~$</span>
+            </div>
+            <!-- Terminal Content -->
+            <div class="p-5 terminal-text text-gray-300 space-y-1 min-h-[320px]" id="terminal-content">
+              <div class="text-gray-500">$ pip install sentinelapi</div>
+              <div class="text-emerald-400">✓ Installed sentinelapi v0.1.0</div>
+              <div class="mt-3 text-gray-500">$ sentinel scan api.example.com</div>
+              <div class="mt-1 text-gray-400">Scanning api.example.com...</div>
+              <div class="mt-2">
+                <span class="text-red-400 font-semibold">⚠ CRITICAL</span>
+                <span class="text-gray-300"> Port 22 (SSH) exposed</span>
+              </div>
+              <div>
+                <span class="text-red-400 font-semibold">⚠ CRITICAL</span>
+                <span class="text-gray-300"> Port 6379 (Redis) no auth</span>
+              </div>
+              <div>
+                <span class="text-yellow-400 font-semibold">⚠ HIGH</span>
+                <span class="text-gray-300"> Port 5432 (Postgres) open</span>
+              </div>
+              <div>
+                <span class="text-yellow-400 font-semibold">⚠ MEDIUM</span>
+                <span class="text-gray-300"> TLS 1.0 detected</span>
+              </div>
+              <div class="mt-2 text-gray-400">Found 4 security issues</div>
+              <div class="mt-1 text-gray-500">$ sentinel report --type soc2</div>
+              <div class="text-emerald-400">✓ SOC2 audit report generated (12 pages)</div>
+              <div class="mt-2 text-gray-500 flex items-center gap-1">$ <span class="animate-pulse-dot">▊</span></div>
+            </div>
+            <div class="scan-overlay absolute inset-0"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Social Proof Bar -->
+  <section class="px-6 md:px-12 pb-16">
+    <div class="max-w-[1440px] mx-auto">
+      <div class="bg-cream-dark rounded-3xl border border-gray-200/60 px-8 md:px-12 py-8">
+        <p class="text-xs font-medium text-gray-400 uppercase tracking-wider mb-6 text-center">Trusted by developers building on</p>
+        <div class="flex flex-wrap items-center justify-center gap-8 md:gap-14 text-gray-300">
+          <span class="text-lg font-semibold tracking-tight">FastAPI</span>
+          <span class="text-lg font-semibold tracking-tight">Express</span>
+          <span class="text-lg font-semibold tracking-tight">Django</span>
+          <span class="text-lg font-semibold tracking-tight">Flask</span>
+          <span class="text-lg font-semibold tracking-tight">AWS</span>
+          <span class="text-lg font-semibold tracking-tight">Supabase</span>
+          <span class="text-lg font-semibold tracking-tight">Railway</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Problem Section -->
+  <section class="px-6 md:px-12 py-20">
+    <div class="max-w-[1440px] mx-auto">
+      <div class="text-center max-w-2xl mx-auto mb-16">
+        <span class="inline-block text-xs font-medium text-red-500 uppercase tracking-wider mb-4">The Problem</span>
+        <h2 class="text-3xl md:text-5xl font-semibold tracking-tight leading-tight mb-5">
+          You're shipping APIs<br>with no security net
+        </h2>
+        <p class="text-lg text-gray-500 leading-relaxed">
+          Existing tools are built for enterprises with $100K security budgets. You have neither.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <!-- Problem Card 1 -->
+        <div class="stat-card bg-white rounded-3xl p-7 border border-gray-100 hover:shadow-lg transition-all duration-300">
+          <div class="w-12 h-12 bg-red-50 rounded-2xl flex items-center justify-center mb-5">
+            <i data-lucide="dollar-sign" class="w-6 h-6 text-red-500"></i>
+          </div>
+          <div class="stat-number text-3xl font-semibold tracking-tight mb-2">$10K+</div>
+          <p class="text-sm text-gray-500 leading-relaxed">Annual cost for enterprise security scanners like Nessus and Qualys</p>
+        </div>
+        <!-- Problem Card 2 -->
+        <div class="stat-card bg-white rounded-3xl p-7 border border-gray-100 hover:shadow-lg transition-all duration-300">
+          <div class="w-12 h-12 bg-orange-50 rounded-2xl flex items-center justify-center mb-5">
+            <i data-lucide="clock" class="w-6 h-6 text-orange-500"></i>
+          </div>
+          <div class="stat-number text-3xl font-semibold tracking-tight mb-2">3 days</div>
+          <p class="text-sm text-gray-500 leading-relaxed">Average time to manually write a SOC2 compliance report</p>
+        </div>
+        <!-- Problem Card 3 -->
+        <div class="stat-card bg-white rounded-3xl p-7 border border-gray-100 hover:shadow-lg transition-all duration-300">
+          <div class="w-12 h-12 bg-yellow-50 rounded-2xl flex items-center justify-center mb-5">
+            <i data-lucide="user-x" class="w-6 h-6 text-yellow-600"></i>
+          </div>
+          <div class="stat-number text-3xl font-semibold tracking-tight mb-2">0</div>
+          <p class="text-sm text-gray-500 leading-relaxed">Security engineers at most startups under 50 people</p>
+        </div>
+        <!-- Problem Card 4 -->
+        <div class="stat-card bg-white rounded-3xl p-7 border border-gray-100 hover:shadow-lg transition-all duration-300">
+          <div class="w-12 h-12 bg-purple-50 rounded-2xl flex items-center justify-center mb-5">
+            <i data-lucide="alert-triangle" class="w-6 h-6 text-purple-500"></i>
+          </div>
+          <div class="stat-number text-3xl font-semibold tracking-tight mb-2">73%</div>
+          <p class="text-sm text-gray-500 leading-relaxed">Of startups have at least one exposed port or leaked credential</p>
+        </div>
+      </div>
+
+      <!-- Comparison -->
+      <div class="mt-16 bg-gray-900 rounded-3xl p-8 md:p-12 overflow-hidden">
+        <h3 class="text-white text-xl font-semibold tracking-tight mb-8 text-center">Why existing tools don't work for you</h3>
+        <div class="overflow-x-auto">
+          <table class="w-full min-w-[600px]">
+            <thead>
+              <tr class="text-left border-b border-gray-700/50">
+                <th class="text-gray-400 text-xs font-medium uppercase tracking-wider pb-4 pr-6">Tool</th>
+                <th class="text-gray-400 text-xs font-medium uppercase tracking-wider pb-4 pr-6">Price</th>
+                <th class="text-gray-400 text-xs font-medium uppercase tracking-wider pb-4 pr-6">Setup</th>
+                <th class="text-gray-400 text-xs font-medium uppercase tracking-wider pb-4">Problem</th>
+              </tr>
+            </thead>
+            <tbody class="text-sm">
+              <tr class="border-b border-gray-800/50">
+                <td class="text-gray-300 py-4 pr-6 font-medium">Datadog Security</td>
+                <td class="text-red-400 py-4 pr-6">$500+/mo</td>
+                <td class="text-gray-500 py-4 pr-6">Days</td>
+                <td class="text-gray-500 py-4">Not API-specific</td>
+              </tr>
+              <tr class="border-b border-gray-800/50">
+                <td class="text-gray-300 py-4 pr-6 font-medium">Snyk</td>
+                <td class="text-yellow-400 py-4 pr-6">$98/mo</td>
+                <td class="text-gray-500 py-4 pr-6">Hours</td>
+                <td class="text-gray-500 py-4">Code scanning only, no runtime</td>
+              </tr>
+              <tr class="border-b border-gray-800/50">
+                <td class="text-gray-300 py-4 pr-6 font-medium">AWS GuardDuty</td>
+                <td class="text-yellow-400 py-4 pr-6">Usage-based</td>
+                <td class="text-gray-500 py-4 pr-6">Complex</td>
+                <td class="text-gray-500 py-4">AWS-only</td>
+              </tr>
+              <tr class="border-b border-gray-800/50">
+                <td class="text-gray-300 py-4 pr-6 font-medium">PagerDuty</td>
+                <td class="text-yellow-400 py-4 pr-6">$21/user/mo</td>
+                <td class="text-gray-500 py-4 pr-6">Hours</td>
+                <td class="text-gray-500 py-4">Alerting only, no detection</td>
+              </tr>
+              <tr class="bg-emerald-500/10 -mx-4 px-4 rounded-xl">
+                <td class="text-emerald-400 py-4 pr-6 font-semibold">SentinelAPI</td>
+                <td class="text-emerald-400 py-4 pr-6 font-semibold">$9–299/mo</td>
+                <td class="text-emerald-400 py-4 pr-6 font-semibold">5 min</td>
+                <td class="text-emerald-300 py-4">API-specific + compliance</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section id="features" class="px-6 md:px-12 py-20 bg-cream-dark/50">
+    <div class="max-w-[1440px] mx-auto">
+      <div class="text-center max-w-2xl mx-auto mb-16">
+        <span class="inline-block text-xs font-medium text-emerald-600 uppercase tracking-wider mb-4">The Solution</span>
+        <h2 class="text-3xl md:text-5xl font-semibold tracking-tight leading-tight mb-5">
+          One SDK. Full security stack.
+        </h2>
+        <p class="text-lg text-gray-500 leading-relaxed">
+          Everything you need to monitor, detect, and report — no security engineer required.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Feature 1 -->
+        <div class="feature-card bg-white rounded-3xl p-8 border border-gray-100">
+          <div class="w-12 h-12 bg-emerald-50 rounded-2xl flex items-center justify-center mb-5">
+            <i data-lucide="plug" class="w-6 h-6 text-emerald-600"></i>
+          </div>
+          <h3 class="text-lg font-medium tracking-tight mb-2">One-line SDK</h3>
+          <p class="text-sm text-gray-500 leading-relaxed mb-4">Wrap FastAPI, Express, or Django with a single line. Middleware captures every request automatically.</p>
+          <div class="bg-gray-900 rounded-xl p-3 terminal-text text-xs text-gray-300">
+            <span class="text-gray-500">from sentinelapi</span> <span class="text-emerald-400">import</span> watch<br>
+            watch(app)
+          </div>
+        </div>
+        <!-- Feature 2 -->
+        <div class="feature-card bg-white rounded-3xl p-8 border border-gray-100">
+          <div class="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center mb-5">
+            <i data-lucide="activity" class="w-6 h-6 text-blue-600"></i>
+          </div>
+          <h3 class="text-lg font-medium tracking-tight mb-2">Real-time Monitoring</h3>
+          <p class="text-sm text-gray-500 leading-relaxed">Learns your API's normal behavior over 24 hours. Detects anomalies using Z-score analysis on request rate, IP clusters, and response codes.</p>
+        </div>
+        <!-- Feature 3 -->
+        <div class="feature-card bg-white rounded-3xl p-8 border border-gray-100">
+          <div class="w-12 h-12 bg-red-50 rounded-2xl flex items-center justify-center mb-5">
+            <i data-lucide="radar" class="w-6 h-6 text-red-500"></i>
+          </div>
+          <h3 class="text-lg font-medium tracking-tight mb-2">Port Scanner</h3>
+          <p class="text-sm text-gray-500 leading-relaxed">Continuously scans your infrastructure for exposed services. Detects open SSH, Redis, Postgres, and custom ports.</p>
+        </div>
+        <!-- Feature 4 -->
+        <div class="feature-card bg-white rounded-3xl p-8 border border-gray-100">
+          <div class="w-12 h-12 bg-orange-50 rounded-2xl flex items-center justify-center mb-5">
+            <i data-lucide="key-round" class="w-6 h-6 text-orange-500"></i>
+          </div>
+          <h3 class="text-lg font-medium tracking-tight mb-2">Credential Leak Detector</h3>
+          <p class="text-sm text-gray-500 leading-relaxed">Git hooks + GitHub API integration watch every commit for leaked API keys, tokens, and passwords in real time.</p>
+        </div>
+        <!-- Feature 5 -->
+        <div class="feature-card bg-white rounded-3xl p-8 border border-gray-100">
+          <div class="w-12 h-12 bg-purple-50 rounded-2xl flex items-center justify-center mb-5">
+            <i data-lucide="brain" class="w-6 h-6 text-purple-500"></i>
+          </div>
+          <h3 class="text-lg font-medium tracking-tight mb-2">AI Alert Triage</h3>
+          <p class="text-sm text-gray-500 leading-relaxed">Claude-powered analysis of every alert. Reduces false positives by 90% and includes remediation steps.</p>
+        </div>
+        <!-- Feature 6 -->
+        <div class="feature-card bg-white rounded-3xl p-8 border border-gray-100">
+          <div class="w-12 h-12 bg-teal-50 rounded-2xl flex items-center justify-center mb-5">
+            <i data-lucide="file-check" class="w-6 h-6 text-teal-600"></i>
+          </div>
+          <h3 class="text-lg font-medium tracking-tight mb-2">Compliance Reports</h3>
+          <p class="text-sm text-gray-500 leading-relaxed">One-click SOC2, GDPR, and ISO27001 audit reports. AI-generated based on your actual security posture.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- How It Works -->
+  <section id="how-it-works" class="px-6 md:px-12 py-20">
+    <div class="max-w-[1440px] mx-auto">
+      <div class="text-center max-w-2xl mx-auto mb-16">
+        <span class="inline-block text-xs font-medium text-gray-400 uppercase tracking-wider mb-4">How It Works</span>
+        <h2 class="text-3xl md:text-5xl font-semibold tracking-tight leading-tight mb-5">
+          Secure in 5 minutes,<br>not 5 weeks
+        </h2>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Step 1 -->
+        <div class="relative">
+          <div class="flex items-center gap-4 mb-6">
+            <div class="w-12 h-12 bg-gray-900 rounded-2xl flex items-center justify-center text-white font-semibold text-lg">1</div>
+            <div class="hidden lg:block flex-1 h-px bg-gray-200"></div>
+          </div>
+          <h3 class="text-xl font-medium tracking-tight mb-3">Install the SDK</h3>
+          <p class="text-sm text-gray-500 leading-relaxed mb-5">Add one line to your FastAPI, Express, or Django app. That's it.</p>
+          <div class="bg-gray-900 rounded-2xl p-5 terminal-text text-sm">
+            <div class="text-gray-500">$ pip install sentinelapi</div>
+            <div class="mt-2 text-gray-300"><span class="text-gray-500"># app.py</span></div>
+            <div class="text-gray-300"><span class="text-purple-400">from</span> fastapi <span class="text-purple-400">import</span> FastAPI</div>
+            <div class="text-gray-300"><span class="text-purple-400">from</span> sentinelapi <span class="text-purple-400">import</span> watch</div>
+            <div class="mt-2 text-gray-300">app = FastAPI()</div>
+            <div class="text-emerald-400">watch(app)  <span class="text-gray-600"># ← that's it</span></div>
+          </div>
+        </div>
+        <!-- Step 2 -->
+        <div class="relative">
+          <div class="flex items-center gap-4 mb-6">
+            <div class="w-12 h-12 bg-gray-900 rounded-2xl flex items-center justify-center text-white font-semibold text-lg">2</div>
+            <div class="hidden lg:block flex-1 h-px bg-gray-200"></div>
+          </div>
+          <h3 class="text-xl font-medium tracking-tight mb-3">We learn & scan</h3>
+          <p class="text-sm text-gray-500 leading-relaxed mb-5">SentinelAPI learns your traffic baseline in 24h and scans your infrastructure for exposed ports.</p>
+          <div class="space-y-3">
+            <div class="flex items-center gap-3 bg-white rounded-xl p-4 border border-gray-100">
+              <div class="w-8 h-8 bg-emerald-50 rounded-lg flex items-center justify-center">
+                <i data-lucide="trending-up" class="w-4 h-4 text-emerald-600"></i>
+              </div>
+              <div>
+                <div class="text-sm font-medium">Baseline learning</div>
+                <div class="text-xs text-gray-400">Rolling 24h window</div>
+              </div>
+              <div class="ml-auto text-xs text-emerald-600 font-medium bg-emerald-50 px-2 py-1 rounded-full">Active</div>
+            </div>
+            <div class="flex items-center gap-3 bg-white rounded-xl p-4 border border-gray-100">
+              <div class="w-8 h-8 bg-blue-50 rounded-lg flex items-center justify-center">
+                <i data-lucide="radar" class="w-4 h-4 text-blue-600"></i>
+              </div>
+              <div>
+                <div class="text-sm font-medium">Port scanning</div>
+                <div class="text-xs text-gray-400">All known ports + custom</div>
+              </div>
+              <div class="ml-auto text-xs text-blue-600 font-medium bg-blue-50 px-2 py-1 rounded-full">Running</div>
+            </div>
+            <div class="flex items-center gap-3 bg-white rounded-xl p-4 border border-gray-100">
+              <div class="w-8 h-8 bg-orange-50 rounded-lg flex items-center justify-center">
+                <i data-lucide="key-round" class="w-4 h-4 text-orange-500"></i>
+              </div>
+              <div>
+                <div class="text-sm font-medium">Git monitoring</div>
+                <div class="text-xs text-gray-400">Watching all commits</div>
+              </div>
+              <div class="ml-auto text-xs text-orange-600 font-medium bg-orange-50 px-2 py-1 rounded-full">Watching</div>
+            </div>
+          </div>
+        </div>
+        <!-- Step 3 -->
+        <div class="relative">
+          <div class="flex items-center gap-4 mb-6">
+            <div class="w-12 h-12 bg-gray-900 rounded-2xl flex items-center justify-center text-white font-semibold text-lg">3</div>
+          </div>
+          <h3 class="text-xl font-medium tracking-tight mb-3">Get alerts & reports</h3>
+          <p class="text-sm text-gray-500 leading-relaxed mb-5">AI-triaged alerts to Slack/email. One-click compliance reports when you need them.</p>
+          <div class="space-y-2">
+            <div class="bg-white rounded-xl p-4 border border-gray-100 flex items-start gap-3">
+              <div class="w-2 h-2 bg-red-500 rounded-full mt-2 threat-pulse flex-shrink-0"></div>
+              <div>
+                <div class="text-sm font-medium text-red-700">CRITICAL: Redis port exposed</div>
+                <div class="text-xs text-gray-400 mt-1">Port 6379 on api.example.com has no authentication. Immediate action required.</div>
+                <div class="text-xs text-emerald-600 mt-2 font-medium">→ Close port or add auth</div>
+              </div>
+            </div>
+            <div class="bg-white rounded-xl p-4 border border-gray-100 flex items-start gap-3">
+              <div class="w-2 h-2 bg-yellow-400 rounded-full mt-2 flex-shrink-0"></div>
+              <div>
+                <div class="text-sm font-medium text-yellow-700">HIGH: Anomalous request spike</div>
+                <div class="text-xs text-gray-400 mt-1">3x normal traffic from 3 IP clusters. Likely not an attack (checked by AI).</div>
+              </div>
+            </div>
+            <div class="bg-white rounded-xl p-4 border border-gray-100 flex items-start gap-3">
+              <div class="w-2 h-2 bg-emerald-500 rounded-full mt-2 flex-shrink-0"></div>
+              <div>
+                <div class="text-sm font-medium">SOC2 report ready</div>
+                <div class="text-xs text-gray-400 mt-1">12-page audit report generated based on current posture.</div>
+                <div class="text-xs text-blue-600 mt-2 font-medium cursor-pointer hover:underline">→ Download PDF</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Live Dashboard Demo -->
+  <section id="demo" class="px-6 md:px-12 py-20 bg-cream-dark/50">
+    <div class="max-w-[1440px] mx-auto">
+      <div class="text-center max-w-2xl mx-auto mb-12">
+        <span class="inline-block text-xs font-medium text-gray-400 uppercase tracking-wider mb-4">Dashboard Preview</span>
+        <h2 class="text-3xl md:text-5xl font-semibold tracking-tight leading-tight mb-5">
+          Your security command center
+        </h2>
+        <p class="text-lg text-gray-500 leading-relaxed">
+          Real-time view of all threats, alerts, and infrastructure status.
+        </p>
+      </div>
+
+      <!-- Dashboard Mockup -->
+      <div class="bg-gray-900 rounded-3xl overflow-hidden shadow-2xl border border-gray-800">
+        <!-- Dashboard Top Bar -->
+        <div class="flex items-center justify-between px-6 py-3 bg-gray-800/60 border-b border-gray-700/50">
+          <div class="flex items-center gap-3">
+            <div class="w-6 h-6 bg-gray-700 rounded-br-lg rounded-tl-lg rounded-tr-sm rounded-bl-sm flex items-center justify-center">
+              <i data-lucide="shield-check" class="w-3 h-3 text-emerald-400"></i>
+            </div>
+            <span class="text-sm text-gray-400 font-medium">SentinelAPI Dashboard</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse-dot"></span>
+            <span class="text-xs text-gray-500">Live</span>
+          </div>
+        </div>
+        <!-- Dashboard Content -->
+        <div class="p-6 grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+          <div class="bg-gray-800/50 rounded-2xl p-5">
+            <div class="text-xs text-gray-500 mb-2">Endpoints Monitored</div>
+            <div class="text-2xl font-semibold text-white">12</div>
+            <div class="text-xs text-emerald-400 mt-1">All healthy</div>
+          </div>
+          <div class="bg-gray-800/50 rounded-2xl p-5">
+            <div class="text-xs text-gray-500 mb-2">Active Alerts</div>
+            <div class="text-2xl font-semibold text-red-400">3</div>
+            <div class="text-xs text-red-400 mt-1">1 critical</div>
+          </div>
+          <div class="bg-gray-800/50 rounded-2xl p-5">
+            <div class="text-xs text-gray-500 mb-2">Requests Today</div>
+            <div class="text-2xl font-semibold text-white" id="request-count">847,291</div>
+            <div class="text-xs text-gray-500 mt-1">+12% vs yesterday</div>
+          </div>
+          <div class="bg-gray-800/50 rounded-2xl p-5">
+            <div class="text-xs text-gray-500 mb-2">Security Score</div>
+            <div class="text-2xl font-semibold text-yellow-400">78<span class="text-lg">/100</span></div>
+            <div class="text-xs text-yellow-400 mt-1">Needs attention</div>
+          </div>
+        </div>
+
+        <!-- Events Feed -->
+        <div class="px-6 pb-2">
+          <div class="flex items-center justify-between mb-3">
+            <h4 class="text-sm font-medium text-gray-400">Live Events</h4>
+            <span class="text-xs text-gray-600">Auto-updating</span>
+          </div>
+        </div>
+        <div class="px-6 pb-6 space-y-2 max-h-64 overflow-y-auto" id="events-feed">
+          <div class="flex items-center gap-3 bg-gray-800/30 rounded-xl px-4 py-3">
+            <div class="w-2 h-2 bg-red-500 rounded-full flex-shrink-0 threat-pulse"></div>
+            <span class="text-xs text-gray-500 w-28 flex-shrink-0">2s ago</span>
+            <span class="text-xs text-gray-300 flex-1">POST <span class="text-gray-500">/api/users</span> — 500 error spike detected (47/min)</span>
+            <span class="text-xs text-red-400 bg-red-500/10 px-2 py-0.5 rounded-full">CRITICAL</span>
+          </div>
+          <div class="flex items-center gap-3 bg-gray-800/30 rounded-xl px-4 py-3">
+            <div class="w-2 h-2 bg-yellow-400 rounded-full flex-shrink-0"></div>
+            <span class="text-xs text-gray-500 w-28 flex-shrink-0">15s ago</span>
+            <span class="text-xs text-gray-300 flex-1">Port scan: 22, 80, 443, 5432 open on <span class="text-gray-500">prod-api.example.com</span></span>
+            <span class="text-xs text-yellow-400 bg-yellow-500/10 px-2 py-0.5 rounded-full">HIGH</span>
+          </div>
+          <div class="flex items-center gap-3 bg-gray-800/30 rounded-xl px-4 py-3">
+            <div class="w-2 h-2 bg-orange-400 rounded-full flex-shrink-0"></div>
+            <span class="text-xs text-gray-500 w-28 flex-shrink-0">1m ago</span>
+            <span class="text-xs text-gray-300 flex-1">Credential leak: <span class="text-gray-500">AWS_SECRET_KEY</span> found in commit <span class="text-gray-500">a3f2c1d</span></span>
+            <span class="text-xs text-orange-400 bg-orange-500/10 px-2 py-0.5 rounded-full">HIGH</span>
+          </div>
+          <div class="flex items-center gap-3 bg-gray-800/30 rounded-xl px-4 py-3">
+            <div class="w-2 h-2 bg-blue-400 rounded-full flex-shrink-0"></div>
+            <span class="text-xs text-gray-500 w-28 flex-shrink-0">3m ago</span>
+            <span class="text-xs text-gray-300 flex-1">Anomaly: unusual User-Agent cluster from <span class="text-gray-500">185.x.x.x/24</span> (AI: likely bot, not attack)</span>
+            <span class="text-xs text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded-full">INFO</span>
+          </div>
+          <div class="flex items-center gap-3 bg-gray-800/30 rounded-xl px-4 py-3">
+            <div class="w-2 h-2 bg-emerald-400 rounded-full flex-shrink-0"></div>
+            <span class="text-xs text-gray-500 w-28 flex-shrink-0">5m ago</span>
+            <span class="text-xs text-gray-300 flex-1">SOC2 compliance report generated — <span class="text-gray-500">12 pages, 4 findings</span></span>
+            <span class="text-xs text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full">DONE</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Integrations -->
+  <section class="px-6 md:px-12 py-20">
+    <div class="max-w-[1440px] mx-auto text-center">
+      <span class="inline-block text-xs font-medium text-gray-400 uppercase tracking-wider mb-4">Integrations</span>
+      <h2 class="text-3xl md:text-4xl font-semibold tracking-tight mb-12">Works with your stack</h2>
+      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4">
+        <div class="bg-white rounded-2xl p-6 border border-gray-100 flex flex-col items-center gap-3 hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+          <div class="w-10 h-10 bg-emerald-50 rounded-xl flex items-center justify-center">
+            <i data-lucide="zap" class="w-5 h-5 text-emerald-600"></i>
+          </div>
+          <span class="text-sm font-medium">FastAPI</span>
+        </div>
+        <div class="bg-white rounded-2xl p-6 border border-gray-100 flex flex-col items-center gap-3 hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+          <div class="w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center">
+            <i data-lucide="server" class="w-5 h-5 text-gray-700"></i>
+          </div>
+          <span class="text-sm font-medium">Express</span>
+        </div>
+        <div class="bg-white rounded-2xl p-6 border border-gray-100 flex flex-col items-center gap-3 hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+          <div class="w-10 h-10 bg-green-50 rounded-xl flex items-center justify-center">
+            <i data-lucide="leaf" class="w-5 h-5 text-green-600"></i>
+          </div>
+          <span class="text-sm font-medium">Django</span>
+        </div>
+        <div class="bg-white rounded-2xl p-6 border border-gray-100 flex flex-col items-center gap-3 hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+          <div class="w-10 h-10 bg-orange-50 rounded-xl flex items-center justify-center">
+            <i data-lucide="flask-conical" class="w-5 h-5 text-orange-500"></i>
+          </div>
+          <span class="text-sm font-medium">Flask</span>
+        </div>
+        <div class="bg-white rounded-2xl p-6 border border-gray-100 flex flex-col items-center gap-3 hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+          <div class="w-10 h-10 bg-purple-50 rounded-xl flex items-center justify-center">
+            <i data-lucide="message-square" class="w-5 h-5 text-purple-600"></i>
+          </div>
+          <span class="text-sm font-medium">Slack</span>
+        </div>
+        <div class="bg-white rounded-2xl p-6 border border-gray-100 flex flex-col items-center gap-3 hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+          <div class="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center">
+            <i data-lucide="github" class="w-5 h-5 text-blue-600"></i>
+          </div>
+          <span class="text-sm font-medium">GitHub</span>
+        </div>
+      </div>
+      <p class="text-sm text-gray-400 mt-8">Plus GitHub Actions, Vercel, Supabase, and more coming soon.</p>
+    </div>
+  </section>
+
+  <!-- Pricing Section -->
+  <section id="pricing" class="px-6 md:px-12 py-20 bg-cream-dark/50">
+    <div class="max-w-[1440px] mx-auto">
+      <div class="text-center max-w-2xl mx-auto mb-12">
+        <span class="inline-block text-xs font-medium text-gray-400 uppercase tracking-wider mb-4">Pricing</span>
+        <h2 class="text-3xl md:text-5xl font-semibold tracking-tight leading-tight mb-5">
+          Start at $9/mo.<br>Enterprise tools cost 50x more.
+        </h2>
+        <p class="text-lg text-gray-500 leading-relaxed">No per-user pricing. No hidden fees. Cancel anytime.</p>
+        <!-- Toggle -->
+        <div class="flex items-center justify-center gap-3 mt-6">
+          <span class="text-sm font-medium text-gray-500" id="monthly-label">Monthly</span>
+          <button id="pricing-toggle" class="relative w-12 h-6 bg-gray-300 rounded-full transition-colors duration-300" onclick="togglePricing()">
+            <div id="toggle-dot" class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-300"></div>
+          </button>
+          <span class="text-sm font-medium text-gray-500" id="annual-label">Annual <span class="text-emerald-600">-20%</span></span>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+        <!-- Starter -->
+        <div class="bg-white rounded-3xl p-8 border border-gray-100 hover:shadow-lg transition-all duration-300">
+          <div class="text-sm font-medium text-gray-500 mb-2">Starter</div>
+          <div class="flex items-baseline gap-1 mb-1">
+            <span class="text-4xl font-semibold tracking-tight price-monthly">$9</span>
+            <span class="text-4xl font-semibold tracking-tight price-annual hidden">$7</span>
+            <span class="text-gray-400 text-sm">/mo</span>
+          </div>
+          <p class="text-xs text-gray-400 mb-6">For solo devs & side projects</p>
+          <a href="#waitlist" class="block w-full text-center bg-gray-100 text-gray-900 text-sm font-medium px-6 py-3 rounded-full hover:bg-gray-200 transition-colors duration-150 mb-8">Join Waitlist</a>
+          <ul class="space-y-3">
+            <li class="flex items-center gap-2.5 text-sm text-gray-600"><i data-lucide="check" class="w-4 h-4 text-emerald-500 flex-shrink-0"></i>3 endpoints</li>
+            <li class="flex items-center gap-2.5 text-sm text-gray-600"><i data-lucide="check" class="w-4 h-4 text-emerald-500 flex-shrink-0"></i>100K requests/mo</li>
+            <li class="flex items-center gap-2.5 text-sm text-gray-600"><i data-lucide="check" class="w-4 h-4 text-emerald-500 flex-shrink-0"></i>Real-time monitoring</li>
+            <li class="flex items-center gap-2.5 text-sm text-gray-600"><i data-lucide="check" class="w-4 h-4 text-emerald-500 flex-shrink-0"></i>Port scanning</li>
+            <li class="flex items-center gap-2.5 text-sm text-gray-600"><i data-lucide="check" class="w-4 h-4 text-emerald-500 flex-shrink-0"></i>Slack alerts</li>
+            <li class="flex items-center gap-2.5 text-sm text-gray-600"><i data-lucide="check" class="w-4 h-4 text-emerald-500 flex-shrink-0"></i>1 compliance report/mo</li>
+          </ul>
+        </div>
+        <!-- Pro (Popular) -->
+        <div class="pricing-popular rounded-3xl p-8 text-white relative overflow-hidden hover:shadow-xl transition-all duration-300 scale-[1.02] md:scale-105">
+          <div class="absolute top-4 right-4 bg-emerald-500 text-white text-xs font-semibold px-3 py-1 rounded-full">Popular</div>
+          <div class="text-sm font-medium text-gray-400 mb-2">Pro</div>
+          <div class="flex items-baseline gap-1 mb-1">
+            <span class="text-4xl font-semibold tracking-tight price-monthly">$149</span>
+            <span class="text-4xl font-semibold tracking-tight price-annual hidden">$119</span>
+            <span class="text-gray-400 text-sm">/mo</span>
+          </div>
+          <p class="text-xs text-gray-500 mb-6">For startups & small teams</p>
+          <a href="#waitlist" class="block w-full text-center bg-emerald-500 text-white text-sm font-medium px-6 py-3 rounded-full hover:bg-emerald-400 transition-colors duration-150 mb-8">Join Waitlist</a>
+          <ul class="space-y-3">
+            <li class="flex items-center gap-2.5 text-sm text-gray-300"><i data-lucide="check" class="w-4 h-4 text-emerald-400 flex-shrink-0"></i>20 endpoints</li>
+            <li class="flex items-center gap-2.5 text-sm text-gray-300"><i data-lucide="check" class="w-4 h-4 text-emerald-400 flex-shrink-0"></i>5M requests/mo</li>
+            <li class="flex items-center gap-2.5 text-sm text-gray-300"><i data-lucide="check" class="w-4 h-4 text-emerald-400 flex-shrink-0"></i>Everything in Starter</li>
+            <li class="flex items-center gap-2.5 text-sm text-gray-300"><i data-lucide="check" class="w-4 h-4 text-emerald-400 flex-shrink-0"></i>Credential leak detection</li>
+            <li class="flex items-center gap-2.5 text-sm text-gray-300"><i data-lucide="check" class="w-4 h-4 text-emerald-400 flex-shrink-0"></i>AI alert triage</li>
+            <li class="flex items-center gap-2.5 text-sm text-gray-300"><i data-lucide="check" class="w-4 h-4 text-emerald-400 flex-shrink-0"></i>Unlimited compliance reports</li>
+            <li class="flex items-center gap-2.5 text-sm text-gray-300"><i data-lucide="check" class="w-4 h-4 text-emerald-400 flex-shrink-0"></i>Email + Slack alerts</li>
+          </ul>
+        </div>
+        <!-- Enterprise -->
+        <div class="bg-white rounded-3xl p-8 border border-gray-100 hover:shadow-lg transition-all duration-300">
+          <div class="text-sm font-medium text-gray-500 mb-2">Enterprise</div>
+          <div class="flex items-baseline gap-1 mb-1">
+            <span class="text-4xl font-semibold tracking-tight price-monthly">$299</span>
+            <span class="text-4xl font-semibold tracking-tight price-annual hidden">$239</span>
+            <span class="text-gray-400 text-sm">/mo</span>
+          </div>
+          <p class="text-xs text-gray-400 mb-6">For growing companies</p>
+          <a href="#waitlist" class="block w-full text-center bg-gray-100 text-gray-900 text-sm font-medium px-6 py-3 rounded-full hover:bg-gray-200 transition-colors duration-150 mb-8">Join Waitlist</a>
+          <ul class="space-y-3">
+            <li class="flex items-center gap-2.5 text-sm text-gray-600"><i data-lucide="check" class="w-4 h-4 text-emerald-500 flex-shrink-0"></i>Unlimited endpoints</li>
+            <li class="flex items-center gap-2.5 text-sm text-gray-600"><i data-lucide="check" class="w-4 h-4 text-emerald-500 flex-shrink-0"></i>Unlimited requests</li>
+            <li class="flex items-center gap-2.5 text-sm text-gray-600"><i data-lucide="check" class="w-4 h-4 text-emerald-500 flex-shrink-0"></i>Everything in Pro</li>
+            <li class="flex items-center gap-2.5 text-sm text-gray-600"><i data-lucide="check" class="w-4 h-4 text-emerald-500 flex-shrink-0"></i>99.9% SLA</li>
+            <li class="flex items-center gap-2.5 text-sm text-gray-600"><i data-lucide="check" class="w-4 h-4 text-emerald-500 flex-shrink-0"></i>Custom compliance frameworks</li>
+            <li class="flex items-center gap-2.5 text-sm text-gray-600"><i data-lucide="check" class="w-4 h-4 text-emerald-500 flex-shrink-0"></i>Dedicated support</li>
+            <li class="flex items-center gap-2.5 text-sm text-gray-600"><i data-lucide="check" class="w-4 h-4 text-emerald-500 flex-shrink-0"></i>Onboarding call included</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Add-ons -->
+      <div class="text-center mt-10">
+        <p class="text-sm text-gray-400 mb-4">Add-ons available on all plans</p>
+        <div class="flex flex-wrap items-center justify-center gap-4 text-sm">
+          <span class="bg-white px-4 py-2 rounded-full border border-gray-100 text-gray-600">Extra endpoints — $10/endpoint/mo</span>
+          <span class="bg-white px-4 py-2 rounded-full border border-gray-100 text-gray-600">Extra requests — $5/1M</span>
+          <span class="bg-white px-4 py-2 rounded-full border border-gray-100 text-gray-600">Onboarding call — $199</span>
+          <span class="bg-white px-4 py-2 rounded-full border border-gray-100 text-gray-600">Custom framework — $499</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Roadmap / Milestones -->
+  <section class="px-6 md:px-12 py-20">
+    <div class="max-w-[1440px] mx-auto">
+      <div class="text-center max-w-2xl mx-auto mb-16">
+        <span class="inline-block text-xs font-medium text-gray-400 uppercase tracking-wider mb-4">Roadmap</span>
+        <h2 class="text-3xl md:text-5xl font-semibold tracking-tight leading-tight mb-5">
+          From idea to $15K MRR
+        </h2>
+      </div>
+
+      <div class="max-w-3xl mx-auto">
+        <div class="relative">
+          <!-- Timeline Line -->
+          <div class="absolute left-[23px] top-6 bottom-6 w-px bg-gray-200"></div>
+
+          <!-- Milestone -->
+          <div class="relative flex gap-6 mb-10">
+            <div class="w-12 h-12 bg-emerald-500 rounded-full flex items-center justify-center flex-shrink-0 z-10 shadow-lg shadow-emerald-500/30">
+              <i data-lucide="check" class="w-5 h-5 text-white"></i>
+            </div>
+            <div class="bg-white rounded-2xl p-6 border border-gray-100 flex-1">
+              <div class="flex items-center justify-between mb-2">
+                <h4 class="font-medium">Landing page + waitlist</h4>
+                <span class="text-xs text-emerald-600 font-medium bg-emerald-50 px-2.5 py-1 rounded-full">Day 1</span>
+              </div>
+              <p class="text-sm text-gray-500">You're looking at it right now.</p>
+            </div>
+          </div>
+
+          <div class="relative flex gap-6 mb-10">
+            <div class="w-12 h-12 bg-emerald-500 rounded-full flex items-center justify-center flex-shrink-0 z-10 shadow-lg shadow-emerald-500/30">
+              <i data-lucide="check" class="w-5 h-5 text-white"></i>
+            </div>
+            <div class="bg-white rounded-2xl p-6 border border-gray-100 flex-1">
+              <div class="flex items-center justify-between mb-2">
+                <h4 class="font-medium">200 waitlist signups</h4>
+                <span class="text-xs text-emerald-600 font-medium bg-emerald-50 px-2.5 py-1 rounded-full">Week 2</span>
+              </div>
+              <p class="text-sm text-gray-500">Building in public, posting on HN, Reddit, Twitter.</p>
+            </div>
+          </div>
+
+          <div class="relative flex gap-6 mb-10">
+            <div class="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center flex-shrink-0 z-10">
+              <i data-lucide="code" class="w-5 h-5 text-gray-500"></i>
+            </div>
+            <div class="bg-white rounded-2xl p-6 border border-gray-100 flex-1">
+              <div class="flex items-center justify-between mb-2">
+                <h4 class="font-medium">MVP complete</h4>
+                <span class="text-xs text-gray-400 font-medium bg-gray-100 px-2.5 py-1 rounded-full">Week 4</span>
+              </div>
+              <p class="text-sm text-gray-500">SDK works on FastAPI + Express. Monitoring, scanning, alerts functional.</p>
+            </div>
+          </div>
+
+          <div class="relative flex gap-6 mb-10">
+            <div class="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center flex-shrink-0 z-10">
+              <i data-lucide="rocket" class="w-5 h-5 text-gray-500"></i>
+            </div>
+            <div class="bg-white rounded-2xl p-6 border border-gray-100 flex-1">
+              <div class="flex items-center justify-between mb-2">
+                <h4 class="font-medium">Beta launch — 20 users</h4>
+                <span class="text-xs text-gray-400 font-medium bg-gray-100 px-2.5 py-1 rounded-full">Week 5</span>
+              </div>
+              <p class="text-sm text-gray-500">First 20 beta customers at $99/mo (early bird discount).</p>
+            </div>
+          </div>
+
+          <div class="relative flex gap-6 mb-10">
+            <div class="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center flex-shrink-0 z-10">
+              <i data-lucide="dollar-sign" class="w-5 h-5 text-gray-500"></i>
+            </div>
+            <div class="bg-white rounded-2xl p-6 border border-gray-100 flex-1">
+              <div class="flex items-center justify-between mb-2">
+                <h4 class="font-medium">$1K MRR</h4>
+                <span class="text-xs text-gray-400 font-medium bg-gray-100 px-2.5 py-1 rounded-full">Month 2</span>
+              </div>
+              <p class="text-sm text-gray-500">7–10 paying customers. Content marketing kicks in.</p>
+            </div>
+          </div>
+
+          <div class="relative flex gap-6 mb-10">
+            <div class="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center flex-shrink-0 z-10">
+              <i data-lucide="trending-up" class="w-5 h-5 text-gray-500"></i>
+            </div>
+            <div class="bg-white rounded-2xl p-6 border border-gray-100 flex-1">
+              <div class="flex items-center justify-between mb-2">
+                <h4 class="font-medium">$5K MRR</h4>
+                <span class="text-xs text-gray-400 font-medium bg-gray-100 px-2.5 py-1 rounded-full">Month 4</span>
+              </div>
+              <p class="text-sm text-gray-500">35 customers. GitHub Action + Marketplace listings drive discovery.</p>
+            </div>
+          </div>
+
+          <div class="relative flex gap-6">
+            <div class="w-12 h-12 bg-gray-900 rounded-full flex items-center justify-center flex-shrink-0 z-10 shadow-lg shadow-gray-900/30">
+              <i data-lucide="trophy" class="w-5 h-5 text-emerald-400"></i>
+            </div>
+            <div class="bg-gray-900 rounded-2xl p-6 flex-1 text-white">
+              <div class="flex items-center justify-between mb-2">
+                <h4 class="font-medium text-emerald-400">$15K MRR</h4>
+                <span class="text-xs text-gray-400 font-medium bg-gray-800 px-2.5 py-1 rounded-full">Month 9</span>
+              </div>
+              <p class="text-sm text-gray-400">100 customers. 101 Pro customers alone hit this target.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Testimonials / Social Proof -->
+  <section class="px-6 md:px-12 py-20 bg-cream-dark/50">
+    <div class="max-w-[1440px] mx-auto">
+      <div class="text-center max-w-2xl mx-auto mb-12">
+        <span class="inline-block text-xs font-medium text-gray-400 uppercase tracking-wider mb-4">From the waitlist</span>
+        <h2 class="text-3xl md:text-4xl font-semibold tracking-tight">Developers want this</h2>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+        <div class="bg-white rounded-3xl p-7 border border-gray-100">
+          <div class="flex items-center gap-1 mb-4">
+            <i data-lucide="star" class="w-4 h-4 text-yellow-400 fill-yellow-400"></i>
+            <i data-lucide="star" class="w-4 h-4 text-yellow-400 fill-yellow-400"></i>
+            <i data-lucide="star" class="w-4 h-4 text-yellow-400 fill-yellow-400"></i>
+            <i data-lucide="star" class="w-4 h-4 text-yellow-400 fill-yellow-400"></i>
+            <i data-lucide="star" class="w-4 h-4 text-yellow-400 fill-yellow-400"></i>
+          </div>
+          <p class="text-sm text-gray-600 leading-relaxed mb-5">"We just lost a $50K deal because we couldn't produce a SOC2 report fast enough. This would have saved us. Waitlist me immediately."</p>
+          <div class="flex items-center gap-3">
+            <div class="w-9 h-9 bg-gray-200 rounded-full flex items-center justify-center text-sm font-semibold text-gray-500">JR</div>
+            <div>
+              <div class="text-sm font-medium">James R.</div>
+              <div class="text-xs text-gray-400">CTO, 15-person startup</div>
+            </div>
+          </div>
+        </div>
+        <div class="bg-white rounded-3xl p-7 border border-gray-100">
+          <div class="flex items-center gap-1 mb-4">
+            <i data-lucide="star" class="w-4 h-4 text-yellow-400 fill-yellow-400"></i>
+            <i data-lucide="star" class="w-4 h-4 text-yellow-400 fill-yellow-400"></i>
+            <i data-lucide="star" class="w-4 h-4 text-yellow-400 fill-yellow-400"></i>
+            <i data-lucide="star" class="w-4 h-4 text-yellow-400 fill-yellow-400"></i>
+            <i data-lucide="star" class="w-4 h-4 text-yellow-400 fill-yellow-400"></i>
+          </div>
+          <p class="text-sm text-gray-600 leading-relaxed mb-5">"I ran a port scan on my own API and found Redis was exposed to the internet. I had no idea. This is terrifying and exactly what I need."</p>
+          <div class="flex items-center gap-3">
+            <div class="w-9 h-9 bg-gray-200 rounded-full flex items-center justify-center text-sm font-semibold text-gray-500">AK</div>
+            <div>
+              <div class="text-sm font-medium">Anika K.</div>
+              <div class="text-xs text-gray-400">Backend engineer, freelance</div>
+            </div>
+          </div>
+        </div>
+        <div class="bg-white rounded-3xl p-7 border border-gray-100">
+          <div class="flex items-center gap-1 mb-4">
+            <i data-lucide="star" class="w-4 h-4 text-yellow-400 fill-yellow-400"></i>
+            <i data-lucide="star" class="w-4 h-4 text-yellow-400 fill-yellow-400"></i>
+            <i data-lucide="star" class="w-4 h-4 text-yellow-400 fill-yellow-400"></i>
+            <i data-lucide="star" class="w-4 h-4 text-yellow-400 fill-yellow-400"></i>
+            <i data-lucide="star" class="w-4 h-4 text-yellow-400 fill-yellow-400"></i>
+          </div>
+          <p class="text-sm text-gray-600 leading-relaxed mb-5">"$9/mo for security monitoring and compliance reports? I'd have been insane not to try this. Datadog quoted us $800/mo for less."</p>
+          <div class="flex items-center gap-3">
+            <div class="w-9 h-9 bg-gray-200 rounded-full flex items-center justify-center text-sm font-semibold text-gray-500">ML</div>
+            <div>
+              <div class="text-sm font-medium">Marco L.</div>
+              <div class="text-xs text-gray-400">Founder, B2B SaaS</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ Section -->
+  <section id="faq" class="px-6 md:px-12 py-20">
+    <div class="max-w-[1440px] mx-auto">
+      <div class="text-center max-w-2xl mx-auto mb-12">
+        <span class="inline-block text-xs font-medium text-gray-400 uppercase tracking-wider mb-4">FAQ</span>
+        <h2 class="text-3xl md:text-4xl font-semibold tracking-tight">Common questions</h2>
+      </div>
+
+      <div class="max-w-3xl mx-auto space-y-3" id="faq-container">
+        <div class="faq-item bg-white rounded-2xl border border-gray-100 overflow-hidden">
+          <button class="faq-toggle w-full flex items-center justify-between p-6 text-left" onclick="toggleFaq(this)">
+            <span class="text-sm font-medium pr-4">Is $9/mo really enough for security monitoring?</span>
+            <i data-lucide="chevron-down" class="w-5 h-5 text-gray-400 flex-shrink-0 transition-transform duration-200"></i>
+          </button>
+          <div class="faq-content hidden px-6 pb-6">
+            <p class="text-sm text-gray-500 leading-relaxed">Yes. The Starter plan covers 3 endpoints and 100K requests — perfect for solo devs and side projects. We keep costs low by using async ingestion and Claude API for AI analysis instead of running expensive dedicated infrastructure. When you scale, upgrade to Pro.</p>
+          </div>
+        </div>
+
+        <div class="faq-item bg-white rounded-2xl border border-gray-100 overflow-hidden">
+          <button class="faq-toggle w-full flex items-center justify-between p-6 text-left" onclick="toggleFaq(this)">
+            <span class="text-sm font-medium pr-4">Will the SDK slow down my API?</span>
+            <i data-lucide="chevron-down" class="w-5 h-5 text-gray-400 flex-shrink-0 transition-transform duration-200"></i>
+          </button>
+          <div class="faq-content hidden px-6 pb-6">
+            <p class="text-sm text-gray-500 leading-relaxed">No. The SDK uses async ingestion — it sends events to our pipeline in the background with &lt;1ms overhead per request. Your API's latency won't change.</p>
+          </div>
+        </div>
+
+        <div class="faq-item bg-white rounded-2xl border border-gray-100 overflow-hidden">
+          <button class="faq-toggle w-full flex items-center justify-between p-6 text-left" onclick="toggleFaq(this)">
+            <span class="text-sm font-medium pr-4">Is the SOC2 report a real certification?</span>
+            <i data-lucide="chevron-down" class="w-5 h-5 text-gray-400 flex-shrink-0 transition-transform duration-200"></i>
+          </button>
+          <div class="faq-content hidden px-6 pb-6">
+            <p class="text-sm text-gray-500 leading-relaxed">It's a SOC2-ready audit report based on your actual security posture — not a certified SOC2 audit. Think of it as the documentation you need to start the formal certification process. It saves days of manual work.</p>
+          </div>
+        </div>
+
+        <div class="faq-item bg-white rounded-2xl border border-gray-100 overflow-hidden">
+          <button class="faq-toggle w-full flex items-center justify-between p-6 text-left" onclick="toggleFaq(this)">
+            <span class="text-sm font-medium pr-4">How is this different from Datadog or Sentry?</span>
+            <i data-lucide="chevron-down" class="w-5 h-5 text-gray-400 flex-shrink-0 transition-transform duration-200"></i>
+          </button>
+          <div class="faq-content hidden px-6 pb-6">
+            <p class="text-sm text-gray-500 leading-relaxed">Datadog is general-purpose monitoring ($500+/mo). Sentry is error tracking. SentinelAPI is specifically for API security — port scanning, credential leak detection, anomaly detection, and compliance reporting. One tool, one price, security-first.</p>
+          </div>
+        </div>
+
+        <div class="faq-item bg-white rounded-2xl border border-gray-100 overflow-hidden">
+          <button class="faq-toggle w-full flex items-center justify-between p-6 text-left" onclick="toggleFaq(this)">
+            <span class="text-sm font-medium pr-4">What happens when I get too many false positive alerts?</span>
+            <i data-lucide="chevron-down" class="w-5 h-5 text-gray-400 flex-shrink-0 transition-transform duration-200"></i>
+          </button>
+          <div class="faq-content hidden px-6 pb-6">
+            <p class="text-sm text-gray-500 leading-relaxed">We use conservative thresholds by default and Claude AI to triage every alert before it reaches you. Alerts include context like "AI analysis: likely not an attack, bot traffic pattern detected" to reduce noise. You can also tune sensitivity per endpoint.</p>
+          </div>
+        </div>
+
+        <div class="faq-item bg-white rounded-2xl border border-gray-100 overflow-hidden">
+          <button class="faq-toggle w-full flex items-center justify-between p-6 text-left" onclick="toggleFaq(this)">
+            <span class="text-sm font-medium pr-4">Can I use this for client APIs as a freelancer?</span>
+            <i data-lucide="chevron-down" class="w-5 h-5 text-gray-400 flex-shrink-0 transition-transform duration-200"></i>
+          </button>
+          <div class="faq-content hidden px-6 pb-6">
+            <p class="text-sm text-gray-500 leading-relaxed">Absolutely. The compliance reports are white-label ready — add them to your client deliverables as a value-add. At $9/mo per project, it's an easy sell. Many freelancers charge extra for "security audits" that SentinelAPI can generate in minutes.</p>
+          </div>
+        </div>
+
+        <div class="faq-item bg-white rounded-2xl border border-gray-100 overflow-hidden">
+          <button class="faq-toggle w-full flex items-center justify-between p-6 text-left" onclick="toggleFaq(this)">
+            <span class="text-sm font-medium pr-4">When does it launch?</span>
+            <i data-lucide="chevron-down" class="w-5 h-5 text-gray-400 flex-shrink-0 transition-transform duration-200"></i>
+          </button>
+          <div class="faq-content hidden px-6 pb-6">
+            <p class="text-sm text-gray-500 leading-relaxed">Target launch is 30 days from today. Waitlist members get first access + early bird pricing (Pro at $99/mo instead of $149/mo, locked forever).</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Waitlist CTA -->
+  <section id="waitlist" class="px-6 md:px-12 py-20">
+    <div class="max-w-[1440px] mx-auto">
+      <div class="relative bg-gray-900 rounded-3xl overflow-hidden">
+        <!-- Background Pattern -->
+        <div class="absolute inset-0 opacity-5" style="background-image: radial-gradient(circle at 1px 1px, white 1px, transparent 0); background-size: 24px 24px;"></div>
+        <div class="absolute top-0 right-0 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+        <div class="absolute bottom-0 left-0 w-72 h-72 bg-emerald-500/5 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2"></div>
+
+        <div class="relative px-8 md:px-16 py-16 md:py-20 text-center">
+          <div class="inline-flex items-center gap-2 bg-white/10 text-emerald-400 text-xs font-medium px-4 py-2 rounded-full mb-6 border border-white/10">
+            <span class="w-2 h-2 bg-emerald-400 rounded-full animate-pulse-dot"></span>
+            <span id="waitlist-count">147</span> developers on the waitlist
+          </div>
+          <h2 class="text-3xl md:text-5xl font-semibold tracking-tight text-white leading-tight mb-5">
+            Stop flying blind.<br>Get early access.
+          </h2>
+          <p class="text-lg text-gray-400 max-w-lg mx-auto mb-10">
+            First 20 waitlist members get Pro at $99/mo forever. Starter from just $9/mo. No credit card required to join.
+          </p>
+
+          <form id="waitlist-form" class="max-w-md mx-auto flex flex-col sm:flex-row gap-3" onsubmit="handleWaitlistSubmit(event)">
+            <input
+              type="email"
+              id="waitlist-email"
+              placeholder="you@company.com"
+              required
+              class="flex-1 bg-white/10 border border-white/10 text-white placeholder-gray-500 text-sm px-5 py-3.5 rounded-full focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/50 transition-colors"
+            >
+            <button
+              type="submit"
+              class="bg-emerald-500 text-white text-sm font-medium px-7 py-3.5 rounded-full hover:bg-emerald-400 hover:scale-105 transition-all duration-150 whitespace-nowrap flex items-center justify-center gap-2"
+            >
+              Join Waitlist
+              <i data-lucide="arrow-right" class="w-4 h-4"></i>
+            </button>
+          </form>
+
+          <p class="text-xs text-gray-600 mt-4">No spam. Unsubscribe anytime. We'll only email you about launch.</p>
+
+          <!-- Trust signals -->
+          <div class="flex items-center justify-center gap-6 mt-8 text-xs text-gray-500">
+            <div class="flex items-center gap-1.5">
+              <i data-lucide="shield" class="w-3.5 h-3.5"></i>
+              SOC2-ready
+            </div>
+            <div class="flex items-center gap-1.5">
+              <i data-lucide="lock" class="w-3.5 h-3.5"></i>
+              GDPR compliant
+            </div>
+            <div class="flex items-center gap-1.5">
+              <i data-lucide="server" class="w-3.5 h-3.5"></i>
+              AWS hosted
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Founder Section -->
+  <section class="px-6 md:px-12 py-16">
+    <div class="max-w-[1440px] mx-auto">
+      <div class="max-w-2xl mx-auto text-center">
+        <div class="w-16 h-16 bg-gray-200 rounded-full mx-auto mb-5 flex items-center justify-center text-xl font-semibold text-gray-500">T</div>
+        <p class="text-gray-500 text-sm leading-relaxed mb-4">
+          "I built SentinelAPI because I was tired of watching startups get breached for reasons that could have been caught with a $9/mo tool. Existing security vendors ignore developers. I'm not going to."
+        </p>
+        <div class="text-sm font-medium">Temz</div>
+        <div class="text-xs text-gray-400">Founder, SentinelAPI · <a href="https://github.com/malikatemz/sentinelapi" class="text-emerald-600 hover:underline">@malikatemz</a></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="px-6 md:px-12 py-12 border-t border-gray-100">
+    <div class="max-w-[1440px] mx-auto">
+      <div class="flex flex-col md:flex-row items-center justify-between gap-6">
+        <div class="flex items-center gap-2.5">
+          <div class="w-7 h-7 bg-gray-900 rounded-br-lg rounded-tl-lg rounded-tr-sm rounded-bl-sm flex items-center justify-center">
+            <i data-lucide="shield-check" class="w-3.5 h-3.5 text-emerald-400"></i>
+          </div>
+          <span class="text-lg font-semibold tracking-tight">SentinelAPI</span>
+        </div>
+        <div class="flex items-center gap-6 text-sm text-gray-400">
+          <a href="#features" class="hover:text-gray-900 transition-colors">Features</a>
+          <a href="#pricing" class="hover:text-gray-900 transition-colors">Pricing</a>
+          <a href="#faq" class="hover:text-gray-900 transition-colors">FAQ</a>
+          <a href="https://github.com/malikatemz/sentinelapi" class="hover:text-gray-900 transition-colors">GitHub</a>
+        </div>
+        <div class="text-xs text-gray-400">
+          © 2025 SentinelAPI. All rights reserved.
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Initialize Lucide icons
+    lucide.createIcons();
+
+    // Mobile menu toggle
+    const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+    const mobileMenu = document.getElementById('mobile-menu');
+    let menuOpen = false;
+
+    mobileMenuBtn.addEventListener('click', () => {
+      menuOpen = !menuOpen;
+      mobileMenu.classList.toggle('hidden', !menuOpen);
+    });
+
+    // Close mobile menu on link click
+    mobileMenu.querySelectorAll('a').forEach(link => {
+      link.addEventListener('click', () => {
+        menuOpen = false;
+        mobileMenu.classList.add('hidden');
+      });
+    });
+
+    // Pricing toggle
+    let isAnnual = false;
+
+    function togglePricing() {
+      isAnnual = !isAnnual;
+      const toggle = document.getElementById('pricing-toggle');
+      const dot = document.getElementById('toggle-dot');
+      const monthlyLabel = document.getElementById('monthly-label');
+      const annualLabel = document.getElementById('annual-label');
+
+      if (isAnnual) {
+        toggle.classList.remove('bg-gray-300');
+        toggle.classList.add('bg-emerald-500');
+        dot.style.transform = 'translateX(24px)';
+        monthlyLabel.classList.remove('text-gray-900');
+        monthlyLabel.classList.add('text-gray-500');
+        annualLabel.classList.remove('text-gray-500');
+        annualLabel.classList.add('text-gray-900');
+      } else {
+        toggle.classList.remove('bg-emerald-500');
+        toggle.classList.add('bg-gray-300');
+        dot.style.transform = 'translateX(0)';
+        monthlyLabel.classList.remove('text-gray-500');
+        monthlyLabel.classList.add('text-gray-900');
+        annualLabel.classList.remove('text-gray-900');
+        annualLabel.classList.add('text-gray-500');
+      }
+
+      document.querySelectorAll('.price-monthly').forEach(el => {
+        el.classList.toggle('hidden', isAnnual);
+      });
+      document.querySelectorAll('.price-annual').forEach(el => {
+        el.classList.toggle('hidden', !isAnnual);
+      });
+    }
+
+    // Initialize pricing labels
+    document.getElementById('monthly-label').classList.add('text-gray-900');
+
+    // FAQ toggle
+    function toggleFaq(button) {
+      const item = button.closest('.faq-item');
+      const content = item.querySelector('.faq-content');
+      const icon = button.querySelector('[data-lucide="chevron-down"]');
+      const isOpen = !content.classList.contains('hidden');
+
+      // Close all others
+      document.querySelectorAll('.faq-item').forEach(other => {
+        if (other !== item) {
+          other.querySelector('.faq-content').classList.add('hidden');
+          other.querySelector('[data-lucide="chevron-down"]').style.transform = 'rotate(0deg)';
+        }
+      });
+
+      content.classList.toggle('hidden', isOpen);
+      icon.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(180deg)';
+    }
+
+    // Toast notification
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      const toastMessage = document.getElementById('toast-message');
+      toastMessage.textContent = message;
+      toast.classList.add('show');
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 4000);
+    }
+
+    // Waitlist form
+    function handleWaitlistSubmit(e) {
+      e.preventDefault();
+      const email = document.getElementById('waitlist-email').value;
+      if (email) {
+        // Increment counter
+        const countEl = document.getElementById('waitlist-count');
+        const currentCount = parseInt(countEl.textContent);
+        countEl.textContent = currentCount + 1;
+
+        // Show toast
+        showToast(`You're on the list! We'll email ${email} at launch.`);
+
+        // Clear form
+        document.getElementById('waitlist-email').value = '';
+
+        // Save to localStorage (simulating backend)
+        const waitlist = JSON.parse(localStorage.getItem('sentinel_waitlist') || '[]');
+        waitlist.push({ email, date: new Date().toISOString() });
+        localStorage.setItem('sentinel_waitlist', JSON.stringify(waitlist));
+      }
+    }
+
+    // Live events feed simulation
+    const events = [
+      { color: 'red', text: 'GET <span class="text-gray-500">/api/products</span> — unusual response time (4.2s avg)', severity: 'HIGH', time: 'just now' },
+      { color: 'blue', text: 'New IP cluster detected: <span class="text-gray-500">91.x.x.x/24</span> (AI: crawler)', severity: 'INFO', time: 'just now' },
+      { color: 'emerald', text: 'Port scan complete: <span class="text-gray-500">staging.example.com</span> — all ports closed', severity: 'OK', time: 'just now' },
+      { color: 'yellow', text: 'Rate limit triggered: <span class="text-gray-500">/api/auth/login</span> — 120 req/min from single IP', severity: 'MEDIUM', time: 'just now' },
+      { color: 'red', text: 'POST <span class="text-gray-500">/api/webhooks</span> — payload size anomaly (12MB)', severity: 'HIGH', time: 'just now' },
+      { color: 'orange', text: 'Git hook: <span class="text-gray-500">DATABASE_URL</span> detected in uncommitted changes', severity: 'HIGH', time: 'just now' },
+      { color: 'emerald', text: 'Baseline updated for <span class="text-gray-500">/api/orders</span> — 24h window complete', severity: 'OK', time: 'just now' },
+      { color: 'blue', text: 'TLS certificate renewal: <span class="text-gray-500">api.example.com</span> — 30 days remaining', severity: 'INFO', time: 'just now' },
+    ];
+
+    const feed = document.getElementById('events-feed');
+    let eventIndex = 0;
+
+    setInterval(() => {
+      const event = events[eventIndex % events.length];
+      const newRow = document.createElement('div');
+      newRow.className = 'flex items-center gap-3 bg-gray-800/30 rounded-xl px-4 py-3';
+      newRow.style.animation = 'fade-in-up 0.4s ease-out';
+      newRow.innerHTML = `
+        <div class="w-2 h-2 bg-${event.color}-400 rounded-full flex-shrink-0 ${event.color === 'red' ? 'threat-pulse' : ''}"></div>
+        <span class="text-xs text-gray-500 w-28 flex-shrink-0">${event.time}</span>
+        <span class="text-xs text-gray-300 flex-1">${event.text}</span>
+        <span class="text-xs text-${event.color}-400 bg-${event.color}-500/10 px-2 py-0.5 rounded-full">${event.severity}</span>
+      `;
+      feed.insertBefore(newRow, feed.firstChild);
+
+      // Keep max 8 events
+      while (feed.children.length > 8) {
+        feed.removeChild(feed.lastChild);
+      }
+
+      eventIndex++;
+    }, 5000);
+
+    // Request count animation
+    let reqCount = 847291;
+    setInterval(() => {
+      reqCount += Math.floor(Math.random() * 50) + 10;
+      document.getElementById('request-count').textContent = reqCount.toLocaleString();
+    }, 3000);
+
+    // Scroll-based nav shadow
+    const nav = document.querySelector('nav');
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 20) {
+        nav.classList.add('shadow-sm');
+      } else {
+        nav.classList.remove('shadow-sm');
+      }
+    });
+
+    // Intersection Observer for scroll animations
+    const observerOptions = {
+      threshold: 0.1,
+      rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.style.opacity = '1';
+          entry.target.style.transform = 'translateY(0)';
+        }
+      });
+    }, observerOptions);
+
+    // Observe all section headings and cards
+    document.querySelectorAll('section > div > .text-center, .feature-card, .stat-card, .faq-item').forEach(el => {
+      el.style.opacity = '0';
+      el.style.transform = 'translateY(20px)';
+      el.style.transition = 'opacity 0.6s ease-out, transform 0.6s ease-out';
+      observer.observe(el);
+    });
+  </script>
+</body>
+</html>
