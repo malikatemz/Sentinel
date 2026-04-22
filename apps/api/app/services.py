@@ -20,7 +20,7 @@ from .repository import (
   summarize_report_window,
   upsert_endpoint,
 )
-from .schemas import EventRecord, IngestRequest, ReportRequest, ScanRequest, SlackTestRequest, WebhookEnvelope
+from .schemas import IngestRequest, ReportRequest, ScanRequest, SlackTestRequest, WebhookEnvelope
 from .settings import settings
 
 traffic_detector = RuleBasedTrafficDetector()
@@ -70,7 +70,7 @@ def ingest_runtime_events(payload: IngestRequest) -> dict[str, object]:
   baseline = traffic_detector.build_baseline(recent_events)
   ip_clusters = Counter(event.ip or "unknown" for event in recent_events)
 
-  if ip_clusters and next(iter(ip_clusters.values())) >= 5:
+  if ip_clusters and ip_clusters.most_common(1)[0][1] >= 5:
     hottest_ip, hottest_count = ip_clusters.most_common(1)[0]
     create_alert(
       payload.org_token,

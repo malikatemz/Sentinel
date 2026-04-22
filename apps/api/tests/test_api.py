@@ -27,6 +27,7 @@ def test_health(tmp_path, monkeypatch):
   response = client.get("/health")
   assert response.status_code == 200
   assert response.json()["status"] == "ok"
+  assert response.headers["x-content-type-options"] == "nosniff"
 
 
 def test_ingest_creates_alerts_and_snapshot(tmp_path, monkeypatch):
@@ -114,3 +115,30 @@ def test_github_webhook_detects_secret_pattern(tmp_path, monkeypatch):
   )
   assert response.status_code == 200
   assert response.json()["findings_count"] >= 1
+
+
+def test_rejects_short_token(tmp_path, monkeypatch):
+  client = make_client(tmp_path, monkeypatch)
+  response = client.post(
+    "/v1/scans/trigger",
+    json={
+      "org_token": "short",
+      "target": "redis.internal",
+    },
+  )
+  assert response.status_code == 422
+
+
+def test_rejects_invalid_github_signature(tmp_path, monkeypatch):
+  monkeypatch.setenv("GITHUB_WEBHOOK_SECRET", "topsecret")
+  client = make_client(tmp_path, monkeypatch)
+  response = client.post(
+    "/v1/webhooks/github",
+    json={
+      "org_token": "org_secret_123",
+      "event_type": "push",
+      "payload": {"message": "hello"},
+    },
+    headers={"X-Hub-Signature-256": "sha256=invalid"},
+  )
+  assert response.status_code == 401
