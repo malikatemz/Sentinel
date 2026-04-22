@@ -6,9 +6,11 @@ from dataclasses import asdict
 import httpx
 
 from .adapters import EventSignal
+from .auth import generate_api_token, hash_token, slugify_org_name
 from .detectors import PatternSecretDetector, PlaceholderPortScanner, RuleBasedTrafficDetector, now_iso
 from .repository import (
   create_alert,
+  create_api_token,
   create_report,
   list_alerts,
   list_endpoints,
@@ -32,7 +34,6 @@ def ingest_runtime_events(payload: IngestRequest) -> dict[str, object]:
   environment = payload.events[0].environment if payload.events else "prod"
   endpoint_id = upsert_endpoint(payload.org_token, payload.endpoint_name, environment)
   created_alerts = 0
-  scored_events = []
 
   for record in payload.events:
     event = EventSignal(
@@ -46,7 +47,6 @@ def ingest_runtime_events(payload: IngestRequest) -> dict[str, object]:
     )
     anomaly = traffic_detector.score_event(event)
     save_event(payload.org_token, endpoint_id, event, anomaly, record.environment)
-    scored_events.append((event, anomaly))
 
     if anomaly.score >= 0.6:
       created_alerts += 1
@@ -250,3 +250,14 @@ def build_alert_description(event: EventSignal, reasons: list[str]) -> str:
     f"{event.method} {event.path} returned {event.status_code} in {event.latency_ms}ms "
     f"and matched: {reason_text}."
   )
+
+
+def issue_api_token(org_name: str, token_name: str) -> dict[str, str]:
+  org_key = slugify_org_name(org_name)
+  token = generate_api_token()
+  create_api_token(org_key, token_name, hash_token(token))
+  return {
+    "org_key": org_key,
+    "token_name": token_name,
+    "token": token,
+  }

@@ -4,6 +4,7 @@ import json
 from datetime import datetime
 
 from .adapters import AnomalyResult, EventSignal, ScanResult, SecretFinding
+from .auth import AuthContext
 from .db import get_connection
 
 
@@ -246,3 +247,38 @@ def summarize_report_window(org_token: str, start_at: str, end_at: str) -> dict[
     "alerts": int(alerts_row["count"]),
   }
 
+
+def create_api_token(org_key: str, token_name: str, token_hash: str) -> None:
+  with get_connection() as connection:
+    connection.execute(
+      """
+      insert into api_tokens (org_key, token_name, token_hash)
+      values (?, ?, ?)
+      """,
+      (org_key, token_name, token_hash),
+    )
+
+
+def find_api_token(token_hash: str) -> AuthContext | None:
+  with get_connection() as connection:
+    row = connection.execute(
+      """
+      select org_key, token_name
+      from api_tokens
+      where token_hash = ?
+      """,
+      (token_hash,),
+    ).fetchone()
+    if not row:
+      return None
+
+    connection.execute(
+      """
+      update api_tokens
+      set last_used_at = current_timestamp
+      where token_hash = ?
+      """,
+      (token_hash,),
+    )
+
+  return AuthContext(org_key=str(row["org_key"]), token_name=str(row["token_name"]))

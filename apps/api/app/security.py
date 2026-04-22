@@ -8,16 +8,19 @@ from hashlib import sha256
 from typing import Deque
 
 from fastapi import HTTPException, Request, status
+from fastapi.responses import JSONResponse
 
+from .auth import AuthContext, hash_token
+from .repository import find_api_token
 from .settings import settings
 
 
 _request_windows: dict[str, Deque[float]] = defaultdict(deque)
 
 
-def validate_org_token(org_token: str) -> str:
+def validate_org_token(org_token: str) -> AuthContext:
     if org_token in settings.dev_org_tokens:
-        return org_token
+        return AuthContext(org_key=org_token, token_name="env-dev")
 
     if len(org_token) < 12:
         raise HTTPException(
@@ -35,7 +38,28 @@ def validate_org_token(org_token: str) -> str:
             detail="Organization token format is invalid.",
         )
 
-    return org_token
+    auth_context = find_api_token(hash_token(org_token))
+    if not auth_context:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Organization token is not recognized.",
+        )
+
+    return auth_context
+
+
+def require_bootstrap_key(header_value: str | None) -> None:
+    if not settings.bootstrap_admin_key:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Bootstrap key is not configured.",
+        )
+
+    if not header_value or not hmac.compare_digest(header_value, settings.bootstrap_admin_key):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid bootstrap key.",
+        )
 
 
 def enforce_rate_limit(client_key: str) -> None:
@@ -68,6 +92,17 @@ def attach_security_headers(request: Request, response) -> None:
     forwarded_proto = request.headers.get("x-forwarded-proto")
     if forwarded_proto == "https":
         response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+
+
+def http_exception_response(request: Request, exc: HTTPException) -> JSONResponse:
+    response = JSONResponse(
+        status_code=exc.status_code,
+        content={"detail": exc.detail},
+    )
+    if exc.status_code == status.HTTP_429_TOO_MANY_REQUESTS:
+        response.headers["Retry-After"] = str(settings.rate_limit_window_seconds)
+    attach_security_headers(request, response)
+    return response
 
 
 def verify_github_signature(body: bytes, signature_header: str | None) -> None:
@@ -118,6 +153,20 @@ def verify_stripe_signature(body: bytes, signature_header: str | None) -> None:
             detail="Malformed Stripe signature.",
         )
 
+    try:
+        timestamp_value = int(timestamp)
+    except ValueError as error:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid Stripe signature timestamp.",
+        ) from error
+
+    if abs(int(time.time()) - timestamp_value) > settings.stripe_signature_tolerance_seconds:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Expired Stripe signature timestamp.",
+        )
+
     signed_payload = f"{timestamp}.{body.decode('utf-8')}".encode("utf-8")
     expected = hmac.new(
         settings.stripe_webhook_secret.encode("utf-8"),
@@ -148,3 +197,11 @@ def parse_json_body(body: bytes) -> dict:
         )
 
     return parsed
+
+
+def enforce_body_size(body: bytes) -> None:
+    if len(body) > settings.request_body_max_bytes:
+        raise HTTPException(
+            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+            detail="Request body exceeds the configured size limit.",
+        )

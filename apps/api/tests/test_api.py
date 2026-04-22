@@ -11,6 +11,10 @@ if str(API_ROOT) not in sys.path:
 
 def make_client(tmp_path, monkeypatch):
   monkeypatch.setenv("SENTINEL_DATABASE_PATH", str(tmp_path / "sentinel.db"))
+  monkeypatch.setenv(
+    "SENTINEL_DEV_TOKENS",
+    "sentinel_demo_token,org_test_123,org_report_123,org_secret_123",
+  )
   import app.settings as settings_module
   import app.db as db_module
   import app.security as security_module
@@ -146,3 +150,50 @@ def test_rejects_invalid_github_signature(tmp_path, monkeypatch):
     headers={"X-Hub-Signature-256": "sha256=invalid"},
   )
   assert response.status_code == 401
+
+
+def test_alerts_require_org_token(tmp_path, monkeypatch):
+  client = make_client(tmp_path, monkeypatch)
+  response = client.get("/v1/alerts")
+  assert response.status_code == 422
+
+
+def test_bootstrap_token_and_use_it(tmp_path, monkeypatch):
+  monkeypatch.setenv("SENTINEL_DEV_TOKENS", "")
+  monkeypatch.setenv("SENTINEL_BOOTSTRAP_ADMIN_KEY", "bootstrap-secret")
+  client = make_client(tmp_path, monkeypatch)
+
+  bootstrap = client.post(
+    "/v1/tokens/bootstrap",
+    headers={"X-Sentinel-Bootstrap-Key": "bootstrap-secret"},
+    json={"org_name": "Acme Security", "token_name": "primary"},
+  )
+  assert bootstrap.status_code == 200
+  issued = bootstrap.json()
+  assert issued["org_key"] == "acme-security"
+  assert issued["token"].startswith("sentinel_")
+
+  ingest = client.post(
+    "/v1/ingest/events",
+    json={
+      "org_token": issued["token"],
+      "endpoint_name": "auth-service",
+      "events": [
+        {
+          "method": "POST",
+          "path": "/auth/token",
+          "status_code": 503,
+          "latency_ms": 1810,
+          "ip": "203.0.113.10",
+          "user_agent": "pytest",
+          "environment": "prod",
+          "occurred_at": "2026-04-22T08:00:00",
+        }
+      ],
+    },
+  )
+  assert ingest.status_code == 200
+
+  alerts = client.get("/v1/alerts", params={"org_token": issued["token"]})
+  assert alerts.status_code == 200
+  assert alerts.json()["summary"]["alerts_total"] >= 1

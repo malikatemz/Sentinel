@@ -28,10 +28,15 @@ class Settings(BaseModel):
     )
     dev_org_tokens: list[str] = _csv_env(
         "SENTINEL_DEV_TOKENS",
-        "sentinel_demo_token,org_test_123,org_report_123,org_secret_123",
+        "",
     )
     rate_limit_window_seconds: int = int(os.getenv("RATE_LIMIT_WINDOW_SECONDS", "60"))
     rate_limit_requests: int = int(os.getenv("RATE_LIMIT_REQUESTS", "120"))
+    request_body_max_bytes: int = int(os.getenv("REQUEST_BODY_MAX_BYTES", str(1024 * 1024)))
+    bootstrap_admin_key: str | None = os.getenv("SENTINEL_BOOTSTRAP_ADMIN_KEY")
+    stripe_signature_tolerance_seconds: int = int(
+        os.getenv("STRIPE_SIGNATURE_TOLERANCE_SECONDS", "300")
+    )
     openai_api_key: str | None = os.getenv("OPENAI_API_KEY")
     supabase_url: str | None = os.getenv("SUPABASE_URL")
     supabase_service_role_key: str | None = os.getenv("SUPABASE_SERVICE_ROLE_KEY")

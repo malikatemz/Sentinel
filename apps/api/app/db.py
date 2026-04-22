@@ -9,6 +9,15 @@ from .settings import settings
 
 
 SCHEMA = """
+create table if not exists api_tokens (
+  id integer primary key autoincrement,
+  org_key text not null,
+  token_name text not null,
+  token_hash text not null unique,
+  created_at text not null default current_timestamp,
+  last_used_at text
+);
+
 create table if not exists endpoints (
   id integer primary key autoincrement,
   org_token text not null,
@@ -102,4 +111,3 @@ def get_connection() -> Iterator[sqlite3.Connection]:
     connection.commit()
   finally:
     connection.close()
-

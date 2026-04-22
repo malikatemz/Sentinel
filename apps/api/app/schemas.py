@@ -51,3 +51,8 @@ class WebhookEnvelope(BaseModel):
   org_token: TokenString | None = None
   event_type: str | None = Field(default=None, max_length=120)
   payload: dict[str, Any]
+
+
+class BootstrapTokenRequest(BaseModel):
+  org_name: Annotated[str, StringConstraints(min_length=3, max_length=80, strip_whitespace=True)]
+  token_name: Annotated[str, StringConstraints(min_length=2, max_length=80, strip_whitespace=True)] = "default"
