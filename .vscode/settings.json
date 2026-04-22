@@ -1,0 +1,9 @@
+{
+  "ollama-chat.serverUrl": "http://127.0.0.1:11434",
+  "ollama-chat.defaultModel": "qwen2.5-coder:latest",
+  "vscode-ollama.baseUrl": "http://127.0.0.1:11434",
+  "vscode-ollama.model": "qwen2.5-coder:latest",
+  "vscode-ollama.maxTokens": 4096,
+  "vscode-ollama.keepAlive": "15 minutes",
+  "vscode-ollama.performanceMode": "Performance"
+}
