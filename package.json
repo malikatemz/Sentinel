@@ -1,0 +1,19 @@
+{
+  "name": "sentinelapi",
+  "private": 
+  "workspaces": [
+    "apps/*",
+    "packages/*",
+    "examples/*"
+  ],
+  "scripts": {
+    "dev:web": "npm run dev --workspace @sentinel/web",
+    "build:web": "npm run build --workspace @sentinel/web",
+    "start:web": "npm run start --workspace @sentinel/web",
+    "build:sdk-node": "npm run build --workspace @sentinel/sdk-node",
+    "dev:demo": "npm run dev --workspace @sentinel/express-demo"
+  },
+  "engines": {
+    "node": ">=24"
+  }
+}

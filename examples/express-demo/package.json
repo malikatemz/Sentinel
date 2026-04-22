@@ -1,0 +1,13 @@
+{
+  "name": "@sentinel/express-demo",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "@sentinel/sdk-node": "0.1.0",
+    "express": "^5.1.0"
+  }
+}
+
