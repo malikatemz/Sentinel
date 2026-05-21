@@ -62,20 +62,20 @@ const steps = [
 const pricing = [
   {
     tier: "Starter",
-    price: "$49",
+    price: "$24",
     copy: "For solo developers and side projects.",
     items: ["3 monitored endpoints", "100K requests per month", "Basic alerts and reports"],
   },
   {
     tier: "Pro",
-    price: "$149",
+    price: "$75",
     featured: true,
     copy: "For startup teams shipping production APIs.",
     items: ["20 monitored endpoints", "5M requests per month", "Slack alerts and richer reporting"],
   },
   {
     tier: "Enterprise",
-    price: "$299",
+    price: "$150",
     copy: "For growing teams that need full coverage.",
     items: ["Unlimited endpoints", "Priority support and SLA", "Custom audit exports"],
   },
@@ -95,8 +95,8 @@ export default function HomePage() {
           </p>
 
           <div className="hero-actions">
-            <Link className="button button-primary" href="/beta">
-              Join the beta
+            <Link className="button button-primary" href="/pricing">
+              View pricing
             </Link>
             <Link className="button button-secondary" href="/docs">
               View the SDK
