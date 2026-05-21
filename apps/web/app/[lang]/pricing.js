@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { SiteShell } from "../../components/site-shell";
+import { SiteShell } from "../../../components/site-shell";
 
 const translations = {
   en: {

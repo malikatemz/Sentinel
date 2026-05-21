@@ -1,14 +1,78 @@
+"use client";
+
+import { useState } from "react";
 import Link from "next/link";
 
-const navItems = [
-  { href: "/", label: "Product" },
-  { href: "/pricing", label: "Pricing" },
-  { href: "/docs", label: "Docs" },
-  { href: "/beta", label: "Beta" },
-  { href: "/app", label: "Dashboard" },
-];
+const langNames = {
+  en: "English",
+  es: "Español", 
+  de: "Deutsch",
+};
 
-export function SiteShell({ children }) {
+export function LanguageToggle({ currentLang = "en" }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const langs = ["en", "es", "de"];
+
+  return (
+    <div className="lang-toggle" style={{ position: "relative", display: "inline-flex" }}>
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        style={{
+          background: "transparent",
+          border: "1px solid #333",
+          padding: "4px 8px",
+          borderRadius: "4px",
+          color: "#fff",
+          cursor: "pointer",
+          fontSize: "12px",
+        }}
+        aria-label="Select language"
+      >
+        {langNames[currentLang] || "English"}
+      </button>
+      {isOpen && (
+        <div
+          style={{
+            position: "absolute",
+            top: "100%",
+            right: 0,
+            background: "#1a1a1a",
+            border: "1px solid #333",
+            borderRadius: "4px",
+            overflow: "hidden",
+            zIndex: 100,
+          }}
+        >
+          {langs.map((code) => (
+            <Link
+              key={code}
+              href={`/${code}`}
+              onClick={() => setIsOpen(false)}
+              style={{
+                display: "block",
+                padding: "6px 12px",
+                color: code === currentLang ? "#00ff88" : "#ccc",
+                textDecoration: "none",
+                fontSize: "12px",
+              }}
+            >
+              {langNames[code]}
+            </Link>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+export function SiteShell({ children, lang = "en" }) {
+  const navItems = [
+    { href: "/", label: "Product" },
+    { href: "/pricing", label: "Pricing" },
+    { href: "/docs", label: "Docs" },
+    { href: "/beta", label: "Beta" },
+  ];
+
   return (
     <div className="page-shell">
       <div className="ambient ambient-left"></div>
@@ -29,6 +93,7 @@ export function SiteShell({ children }) {
           <Link className="nav-cta" href="/beta">
             Join Beta
           </Link>
+          <LanguageToggle currentLang={lang} />
         </nav>
       </header>
 
