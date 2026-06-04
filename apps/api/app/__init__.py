@@ -1,1 +1,1 @@
-
+"""Sentinel API — application package."""

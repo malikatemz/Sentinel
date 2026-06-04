@@ -1,23 +1,16 @@
 {
-  "name": "sentinelapi",
+  "name": "sentinel",
   "private": true,
   "workspaces": [
     "apps/*",
-    "packages/*",
-    "examples/*"
+    "packages/*"
   ],
   "scripts": {
     "dev:web": "npm run dev --workspace @sentinel/web",
-    "build:web": "node -e \"require('fs').rmSync('apps/web/.next',{recursive:true,force:true})\" && npm run build --workspace @sentinel/web",
-    "start:web": "npm run start --workspace @sentinel/web",
-    "build:sdk-node": "npm run build --workspace @sentinel/sdk-node",
-    "dev:demo": "npm run dev --workspace @sentinel/express-demo",
-    "supabase:start": "npx supabase start",
-    "supabase:stop": "npx supabase stop",
-    "supabase:status": "npx supabase status",
-    "supabase:reset": "npx supabase db reset"
+    "build:web": "npm run build --workspace @sentinel/web",
+    "start:web": "npm run start --workspace @sentinel/web"
   },
   "engines": {
-    "node": ">=24"
+    "node": ">=20"
   }
 }

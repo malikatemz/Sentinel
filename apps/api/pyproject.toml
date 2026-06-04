@@ -1,13 +1,30 @@
 [project]
-name = "sentinelapi-api"
+name = "sentinel-api"
 version = "0.1.0"
-description = "FastAPI backend for SentinelAPI"
+description = "Sentinel API monitoring backend"
 requires-python = ">=3.12"
 dependencies = [
   "fastapi>=0.115",
-  "uvicorn>=0.32",
+  "uvicorn[standard]>=0.32",
   "pydantic>=2.9",
-  "httpx>=0.28"
+  "pydantic-settings>=2.6",
+  "sqlalchemy[asyncio]>=2.0",
+  "asyncpg>=0.30",
+  "alembic>=1.14",
+  "passlib[bcrypt]>=1.7",
+  "python-jose[cryptography]>=3.3",
+  "python-multipart>=0.0.12",
+  "email-validator>=2.2",
+  "redis>=5.2",
+  "aiosmtplib>=3.0",
+  "httpx>=0.28",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.0",
+  "pytest-asyncio>=0.24",
+  "httpx>=0.28",
 ]
 
 [build-system]
