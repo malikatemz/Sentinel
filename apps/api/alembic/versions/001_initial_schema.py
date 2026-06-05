@@ -11,7 +11,7 @@ import sqlalchemy as sa
 # pyrefly: ignore [missing-import]
 from sqlalc
 # pyrefly: ignore [missing-import, parse-error]
-hemy.dialects import postgresql
+emy.dialects import postgresql
 
 revision = "001"
 down_revision = None
