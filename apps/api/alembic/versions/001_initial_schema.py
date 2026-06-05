@@ -8,9 +8,9 @@ Create Date: 2026-06-04
 from alembic import op
 # pyrefly: ignore [missing-import]
 import sqlalchemy as sa
-# pyrefly: ignore [missing-import]
-from sqlalc
 # pyrefly: ignore [missing-import, parse-error]
+from sqlalc
+# pyrefly: ignore [missing-import, parse-error, unknown-name]
 emy.dialects import postgresql
 
 revision = "001"
